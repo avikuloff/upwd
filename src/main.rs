@@ -1,6 +1,8 @@
 #[macro_use]
 extern crate clap;
 
+use std::io::stdout;
+
 use clap::ArgGroup;
 use clap::derive::Clap;
 use indexmap::IndexSet;
@@ -22,9 +24,7 @@ fn main() {
 
     if opts.info {
         let entropy = calculate_entropy(length as u32, pool.len()).floor();
-        println!("\nEntropy: {} bit", entropy);
-        println!("Length: {} chars", length);
-        println!("Pool size: {} chars", pool.len());
+        Info::new(entropy, length, pool.len()).write(stdout());
     }
 }
 
@@ -50,19 +50,19 @@ struct Opts {
 #[derive(Clap, Debug)]
 #[clap(group = ArgGroup::new("charset").required(true).multiple(true))]
 struct Charset {
-    /// Use UPPERCASE letters [A-Z] for password generation
+    /// Use UPPERCASE letters [A-Z]
     #[clap(short, long, group = "charset")]
     uppercase: bool,
 
-    /// Uses lowercase [a-z] letters for password generation
+    /// Uses lowercase [a-z]
     #[clap(short, long, group = "charset")]
     lowercase: bool,
 
-    /// Use digits [0-9] for password generation
+    /// Use digits [0-9]
     #[clap(short, long, group = "charset")]
     digits: bool,
 
-    /// Use special symbols [*&^%$#@!~] for password generation
+    /// Use special symbols [*&^%$#@!~]
     #[clap(short, long, group = "charset")]
     symbols: bool,
 }
@@ -112,16 +112,41 @@ fn generate_password(pool: IndexSet<char>, length: usize) -> String {
 }
 
 /// Calculates entropy.
-// FixMe Добавить обработку результата конвертации из BigUint в f64
 fn calculate_entropy(length: u32, pool_size: usize) -> f64 {
     BigUint::from(pool_size)
         .pow(length)
         .to_f64()
-        .unwrap()
+        .expect("Typecast error! Failed to convert BigUint to f64.")
         .log2()
 }
 
 /// Calculates the required password length to obtain the given entropy.
 fn calculate_length(entropy: f64, pool_size: f64) -> f64 {
     entropy / pool_size.log2()
+}
+
+#[derive(Debug, Clone)]
+struct Info {
+    entropy: f64,
+    length: usize,
+    pool_size: usize,
+}
+
+impl Info {
+    /// Creates new instance
+    fn new(entropy: f64, length: usize, pool_size: usize) -> Self {
+        Info {
+            entropy,
+            length,
+            pool_size,
+        }
+    }
+
+    /// Prints info
+    // FixMe Как обработать ошибки?
+    fn write(&self, mut writer: impl std::io::Write) {
+        writeln!(writer, "Entropy: {} bits", self.entropy).unwrap();
+        writeln!(writer, "Length: {} chars", self.length).unwrap();
+        writeln!(writer, "Pool size: {} chars", self.pool_size).unwrap();
+    }
 }
