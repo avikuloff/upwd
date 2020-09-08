@@ -1,0 +1,18 @@
+[package]
+name = "upwd"
+version = "0.1.0"
+authors = ["Andrey Vikulov <avikuloff@yandex.ru>"]
+license = "MIT OR Apache-2.0"
+description = "Random password generator"
+keywords = ["cli", "password"]
+categories = ["command-line-utilities"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rand = "0.7"
+clap = "3.0.0-beta.1"
+num-bigint = "0.3"
+num-traits = "0.2"
+indexmap = "1.6"
