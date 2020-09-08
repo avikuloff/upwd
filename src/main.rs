@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate clap;
 
-use std::io::stdout;
+use std::io::{stdout, Write};
 
 use clap::ArgGroup;
 use clap::derive::Clap;
@@ -23,7 +23,7 @@ fn main() {
     println!("{}", password);
 
     if opts.info {
-        let entropy = calculate_entropy(length as u32, pool.len()).floor();
+        let entropy = calculate_entropy(length as u32, pool.len());
         Info::new(entropy, length, pool.len()).write(stdout());
     }
 }
@@ -144,8 +144,8 @@ impl Info {
 
     /// Prints info
     // FixMe Как обработать ошибки?
-    fn write(&self, mut writer: impl std::io::Write) {
-        writeln!(writer, "Entropy: {} bits", self.entropy).unwrap();
+    fn write(&self, mut writer: impl Write) {
+        writeln!(writer, "Entropy: {:.0} bits", self.entropy).unwrap();
         writeln!(writer, "Length: {} chars", self.length).unwrap();
         writeln!(writer, "Pool size: {} chars", self.pool_size).unwrap();
     }
