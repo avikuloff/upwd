@@ -37,12 +37,12 @@ struct Opts {
     #[clap(flatten)]
     charset: Charset,
 
-    /// Sets the length (number of characters) of the password
+    /// Sets the required password length
     #[clap(short = "L", long, value_name = "NUMBER", default_value = "12")]
     length: usize,
 
-    /// Sets the entropy of the password
-    #[clap(short, long, value_name = "NUMBER", conflicts_with = "length")]
+    /// Sets the minimum required password entropy (conflicts with --length)
+    #[clap(short = "E", long, value_name = "NUMBER", conflicts_with = "length")]
     entropy: Option<f64>,
 
     /// Prints password information
