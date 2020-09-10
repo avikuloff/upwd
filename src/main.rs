@@ -194,6 +194,23 @@ mod tests {
     }
 
     #[test]
+    fn generate_password_intersection() {
+        let pool = Charset {
+            uppercase: true,
+            lowercase: true,
+            digits: true,
+            symbols: true,
+        }.collect();
+
+        let password: IndexSet<char> = generate_password(pool, 1000).chars().collect();
+
+        assert!(!password.is_disjoint(&Charset::UPPERCASE.chars().collect::<IndexSet<char>>()));
+        assert!(!password.is_disjoint(&Charset::LOWERCASE.chars().collect::<IndexSet<char>>()));
+        assert!(!password.is_disjoint(&Charset::DIGITS.chars().collect::<IndexSet<char>>()));
+        assert!(!password.is_disjoint(&Charset::SYMBOLS.chars().collect::<IndexSet<char>>()));
+    }
+
+    #[test]
     #[should_panic(expected = "Pool contains no elements!")]
     fn generate_password_passed_empty_pool() {
         let pool = "".chars().collect::<IndexSet<char>>();
@@ -223,6 +240,13 @@ mod tests {
     }
 
     #[test]
+    fn calculate_entropy_passed_pool_size_is_1() {
+        let entropy = calculate_entropy(12, 1);
+
+        assert_eq!(entropy, 0.0)
+    }
+
+    #[test]
     fn calculate_length_assert_true() {
         let length = calculate_length(128.0, 64.0);
 
@@ -230,10 +254,10 @@ mod tests {
     }
 
     #[test]
-    fn calculate_length_passed_entropy_is_0() {
+    fn calculate_length_entropy_is_0() {
         let length = calculate_length(0.0, 64.0);
 
-        assert_eq!(length.ceil(), 0.0);
+        assert_eq!(length, 0.0);
     }
 
     #[test]
