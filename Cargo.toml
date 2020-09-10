@@ -1,12 +1,13 @@
 [package]
 name = "upwd"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Andrey Vikulov <avikuloff@yandex.ru>"]
 license = "MIT OR Apache-2.0"
 description = "Random password generator"
 keywords = ["cli", "password"]
 categories = ["command-line-utilities"]
 repository = "https://github.com/avikuloff/upwd/"
+readme = "README.md"
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
