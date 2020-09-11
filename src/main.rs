@@ -3,7 +3,7 @@ extern crate clap;
 
 use std::io::{stdout, Write};
 
-use clap::ArgGroup;
+use clap::{AppSettings, ArgGroup};
 use clap::derive::Clap;
 use indexmap::IndexSet;
 use num_bigint::BigUint;
@@ -40,7 +40,10 @@ fn main() {
 }
 
 #[derive(Clap, Debug)]
-#[clap(author, about, version, group = ArgGroup::new("charset").required(true).multiple(true))]
+#[clap(author, about, version,
+group = ArgGroup::new("charset").required(true).multiple(true),
+setting = AppSettings::DeriveDisplayOrder
+)]
 struct Opts {
     /// Use UPPERCASE letters [A-Z]
     #[clap(short, long, group = "charset")]
@@ -74,7 +77,7 @@ struct Opts {
     #[clap(short, long)]
     info: bool,
 
-    /// Reset config to default values
+    /// Sets config to default values
     #[clap(long = "config")]
     reset: bool,
 
@@ -189,7 +192,7 @@ mod tests {
         assert!(pool.contains(&'a'));
         assert!(pool.contains(&'0'));
         assert!(pool.contains(&'&'));
-        assert!(pool.contains(&'⚓'));
+        assert!(pool.contains(&'♖'));
     }
 
     #[test]
