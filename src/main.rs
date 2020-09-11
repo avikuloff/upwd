@@ -10,10 +10,18 @@ use num_bigint::BigUint;
 use num_traits::ToPrimitive;
 use rand::Rng;
 
+use config::Config;
+
+mod config;
+
 fn main() {
     let opts: Opts = Opts::parse();
 
-    let pool = opts.charset.collect();
+    if opts.reset {
+        Config::save_default().unwrap();
+    }
+
+    let pool = opts.collect_charset();
 
     // Если в команде передана опция --entropy, то вычисляем необходимую длину пароля,
     // иначе присваивается значение по умолчанию.
@@ -32,27 +40,8 @@ fn main() {
 }
 
 #[derive(Clap, Debug)]
-#[clap(author, about, version)]
+#[clap(author, about, version, group = ArgGroup::new("charset").required(true).multiple(true))]
 struct Opts {
-    #[clap(flatten)]
-    charset: Charset,
-
-    /// Sets the required password length
-    #[clap(short = "L", long, value_name = "NUMBER", default_value = "12")]
-    length: usize,
-
-    /// Sets the minimum required password entropy (conflicts with --length)
-    #[clap(short = "E", long, value_name = "NUMBER", conflicts_with = "length")]
-    entropy: Option<f64>,
-
-    /// Prints password information
-    #[clap(short, long)]
-    info: bool,
-}
-
-#[derive(Clap, Debug)]
-#[clap(group = ArgGroup::new("charset").required(true).multiple(true))]
-struct Charset {
     /// Use UPPERCASE letters [A-Z]
     #[clap(short, long, group = "charset")]
     uppercase: bool,
@@ -68,29 +57,50 @@ struct Charset {
     /// Use special symbols [*&^%$#@!~]
     #[clap(short, long, group = "charset")]
     symbols: bool,
+
+    /// Use other symbols (see config file).
+    #[clap(short, long, group = "charset")]
+    others: bool,
+
+    /// Sets the required password length
+    #[clap(short = "L", long, value_name = "NUMBER", default_value = "12")]
+    length: usize,
+
+    /// Sets the minimum required password entropy (conflicts with --length)
+    #[clap(short = "E", long, value_name = "NUMBER", conflicts_with = "length")]
+    entropy: Option<f64>,
+
+    /// Prints password information
+    #[clap(short, long)]
+    info: bool,
+
+    /// Reset config to default values
+    #[clap(long = "config")]
+    reset: bool,
+
+    #[clap(skip = Config::new())]
+    config: Config,
 }
 
-impl Charset {
-    pub const UPPERCASE: &'static str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    pub const LOWERCASE: &'static str = "abcdefghijklmnopqrstuvwxyz";
-    pub const DIGITS: &'static str = "0123456789";
-    pub const SYMBOLS: &'static str = "*&^%$#@!~";
-
-    /// Will panic if all fields are false
-    fn collect(&self) -> IndexSet<char> {
+impl Opts {
+    // Will panic if all fields are false
+    fn collect_charset(&self) -> IndexSet<char> {
         let mut pool = IndexSet::new();
 
         if self.uppercase {
-            pool.extend(Charset::UPPERCASE.chars());
+            pool.extend(&self.config.uppercase());
         }
         if self.lowercase {
-            pool.extend(Charset::LOWERCASE.chars());
+            pool.extend(&self.config.lowercase());
         }
         if self.digits {
-            pool.extend(Charset::DIGITS.chars());
+            pool.extend(&self.config.digits());
         }
         if self.symbols {
-            pool.extend(Charset::SYMBOLS.chars());
+            pool.extend(&self.config.symbols());
+        }
+        if self.others {
+            pool.extend(&self.config.others());
         }
 
         assert!(!pool.is_empty(), "Pool contains no elements!");
@@ -160,29 +170,44 @@ mod tests {
     use super::*;
 
     #[test]
-    fn charset_collect() {
-        let charset = Charset {
+    fn charset_collect_charset() {
+        let pool = Opts {
             uppercase: true,
             lowercase: true,
             digits: true,
             symbols: true,
-        }.collect();
+            others: true,
+            length: 0,
+            entropy: None,
+            info: false,
+            reset: false,
+            config: Config::default(),
+        }
+            .collect_charset();
 
-        assert!(charset.contains(&'A'));
-        assert!(charset.contains(&'a'));
-        assert!(charset.contains(&'0'));
-        assert!(charset.contains(&'&'));
+        assert!(pool.contains(&'A'));
+        assert!(pool.contains(&'a'));
+        assert!(pool.contains(&'0'));
+        assert!(pool.contains(&'&'));
+        assert!(pool.contains(&'⚓'));
     }
 
     #[test]
     #[should_panic(expected = "Pool contains no elements!")]
     fn charset_collect_all_fields_false() {
-        Charset {
+        Opts {
             uppercase: false,
             lowercase: false,
             digits: false,
             symbols: false,
-        }.collect();
+            others: false,
+            length: 0,
+            entropy: None,
+            info: false,
+            reset: false,
+            config: Config::default(),
+        }
+            .collect_charset();
     }
 
     #[test]
@@ -195,19 +220,29 @@ mod tests {
 
     #[test]
     fn generate_password_intersection() {
-        let pool = Charset {
+        let cfg = Config::default();
+
+        let pool = Opts {
             uppercase: true,
             lowercase: true,
             digits: true,
             symbols: true,
-        }.collect();
+            others: true,
+            length: 0,
+            entropy: None,
+            info: false,
+            reset: false,
+            config: Config::default(),
+        }
+            .collect_charset();
 
         let password: IndexSet<char> = generate_password(pool, 1000).chars().collect();
 
-        assert!(!password.is_disjoint(&Charset::UPPERCASE.chars().collect::<IndexSet<char>>()));
-        assert!(!password.is_disjoint(&Charset::LOWERCASE.chars().collect::<IndexSet<char>>()));
-        assert!(!password.is_disjoint(&Charset::DIGITS.chars().collect::<IndexSet<char>>()));
-        assert!(!password.is_disjoint(&Charset::SYMBOLS.chars().collect::<IndexSet<char>>()));
+        assert!(!password.is_disjoint(&cfg.uppercase()));
+        assert!(!password.is_disjoint(&cfg.lowercase()));
+        assert!(!password.is_disjoint(&cfg.digits()));
+        assert!(!password.is_disjoint(&cfg.symbols()));
+        assert!(!password.is_disjoint(&cfg.others()));
     }
 
     #[test]
