@@ -162,9 +162,11 @@ impl Info {
     // Prints info
     // FixMe Как обработать ошибки?
     fn write(&self, mut writer: impl Write) {
-        writeln!(writer, "Entropy: {:.0} bits", self.entropy).unwrap();
-        writeln!(writer, "Length: {} chars", self.length).unwrap();
-        writeln!(writer, "Pool size: {} chars", self.pool_size).unwrap();
+        writeln!(
+            writer,
+            "Entropy: {:.0} bits | Length: {} chars | Pool size: {} chars",
+            self.entropy, self.length, self.pool_size
+        ).unwrap();
     }
 }
 
@@ -310,7 +312,7 @@ mod tests {
         let mut actual: Vec<u8> = vec![];
         Info::new(64.0, 15, 64).write(&mut actual);
 
-        let expected = b"Entropy: 64 bits\nLength: 15 chars\nPool size: 64 chars\n".to_vec();
+        let expected = b"Entropy: 64 bits | Length: 15 chars | Pool size: 64 chars\n".to_vec();
 
         assert_eq!(actual, expected);
     }
