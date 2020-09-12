@@ -1,16 +1,12 @@
 #[macro_use]
 extern crate clap;
 
-use std::io::{stdout, Write};
-
-use clap::{AppSettings, ArgGroup};
 use clap::derive::Clap;
-use indexmap::IndexSet;
-use num_bigint::BigUint;
-use num_traits::ToPrimitive;
-use rand::Rng;
-
+use clap::{AppSettings, ArgGroup};
 use config::Config;
+use indexmap::IndexSet;
+use std::io::{stdout, Write};
+use upwd::{calculate_entropy, calculate_length, generate_password};
 
 mod config;
 
@@ -34,7 +30,7 @@ fn main() {
     println!("{}", password);
 
     if opts.info {
-        let entropy = calculate_entropy(length as u32, pool.len());
+        let entropy = calculate_entropy(length, pool.len());
         Info::new(entropy, length, pool.len()).write(stdout());
     }
 }
@@ -112,36 +108,6 @@ impl Opts {
     }
 }
 
-// Generate random password.
-// Panics if `pool` is empty.
-fn generate_password(pool: IndexSet<char>, length: usize) -> String {
-    assert!(!pool.is_empty(), "Pool contains no elements!");
-
-    let mut rng = rand::thread_rng();
-
-    (0..length)
-        .map(|_| {
-            let idx = rng.gen_range(0, pool.len());
-            pool[idx]
-        })
-        .collect()
-}
-
-// Calculates entropy.
-// ToDo Нужно ли возвращать бесконечность?
-fn calculate_entropy(length: u32, pool_size: usize) -> f64 {
-    BigUint::from(pool_size)
-        .pow(length)
-        .to_f64()
-        .expect("Typecast error! Failed to convert BigUint to f64!")
-        .log2()
-}
-
-// Calculates the required password length to obtain the given entropy.
-fn calculate_length(entropy: f64, pool_size: f64) -> f64 {
-    entropy / pool_size.log2()
-}
-
 #[derive(Debug, Clone)]
 struct Info {
     entropy: f64,
@@ -166,7 +132,8 @@ impl Info {
             writer,
             "Entropy: {:.0} bits | Length: {} chars | Pool size: {} chars",
             self.entropy, self.length, self.pool_size
-        ).unwrap();
+        )
+        .unwrap();
     }
 }
 
@@ -188,7 +155,7 @@ mod tests {
             reset: false,
             config: Config::default(),
         }
-            .collect_charset();
+        .collect_charset();
 
         assert!(pool.contains(&'A'));
         assert!(pool.contains(&'a'));
@@ -212,15 +179,7 @@ mod tests {
             reset: false,
             config: Config::default(),
         }
-            .collect_charset();
-    }
-
-    #[test]
-    fn generate_password_assert_len() {
-        let pool = "0123456789".chars().collect::<IndexSet<char>>();
-        let password = generate_password(pool, 15);
-
-        assert_eq!(password.len(), 15);
+        .collect_charset();
     }
 
     #[test]
@@ -239,7 +198,7 @@ mod tests {
             reset: false,
             config: Config::default(),
         }
-            .collect_charset();
+        .collect_charset();
 
         let password: IndexSet<char> = generate_password(pool, 1000).chars().collect();
 
@@ -248,63 +207,6 @@ mod tests {
         assert!(!password.is_disjoint(&cfg.digits()));
         assert!(!password.is_disjoint(&cfg.symbols()));
         assert!(!password.is_disjoint(&cfg.others()));
-    }
-
-    #[test]
-    #[should_panic(expected = "Pool contains no elements!")]
-    fn generate_password_passed_empty_pool() {
-        let pool = "".chars().collect::<IndexSet<char>>();
-
-        generate_password(pool, 15);
-    }
-
-    #[test]
-    fn calculate_entropy_assert_true() {
-        let entropy = calculate_entropy(12, 64);
-
-        assert_eq!(entropy, 72.0);
-    }
-
-    #[test]
-    fn calculate_entropy_passed_length_is_0() {
-        let entropy = calculate_entropy(0, 64);
-
-        assert_eq!(entropy, 0.0)
-    }
-
-    #[test]
-    fn calculate_entropy_passed_pool_size_is_0() {
-        let entropy = calculate_entropy(12, 0);
-
-        assert_eq!(entropy, f64::NEG_INFINITY)
-    }
-
-    #[test]
-    fn calculate_entropy_passed_pool_size_is_1() {
-        let entropy = calculate_entropy(12, 1);
-
-        assert_eq!(entropy, 0.0)
-    }
-
-    #[test]
-    fn calculate_length_assert_true() {
-        let length = calculate_length(128.0, 64.0);
-
-        assert_eq!(length.ceil(), 22.0);
-    }
-
-    #[test]
-    fn calculate_length_entropy_is_0() {
-        let length = calculate_length(0.0, 64.0);
-
-        assert_eq!(length, 0.0);
-    }
-
-    #[test]
-    fn calculate_length_pool_size_is_0() {
-        let length = calculate_length(128.0, 0.0);
-
-        assert_eq!(length, 0.0);
     }
 
     #[test]
