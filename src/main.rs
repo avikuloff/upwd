@@ -26,7 +26,7 @@ fn main() {
     });
 
     for _ in 0..opts.count {
-        let password = generate_password(pool.clone(), length);
+        let password = generate_password(&pool, length);
 
         println!("{}", password);
     }
@@ -209,7 +209,7 @@ mod tests {
         }
         .collect_charset();
 
-        let password: IndexSet<char> = generate_password(pool, 1000).chars().collect();
+        let password: IndexSet<char> = generate_password(&pool, 1000).chars().collect();
 
         assert!(!password.is_disjoint(&cfg.uppercase()));
         assert!(!password.is_disjoint(&cfg.lowercase()));

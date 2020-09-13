@@ -9,14 +9,14 @@ use rand::Rng;
 /// ```
 /// # use indexmap::IndexSet;
 /// let pool = "0123456789".chars().collect::<IndexSet<char>>();
-/// let password = upwd::generate_password(pool, 15);
+/// let password = upwd::generate_password(&pool, 15);
 ///
 /// assert_eq!(password.len(), 15);
 /// ```
 ///
 /// # Panics
 /// Panics if `pool` is empty.
-pub fn generate_password(pool: IndexSet<char>, length: usize) -> String {
+pub fn generate_password(pool: &IndexSet<char>, length: usize) -> String {
     assert!(!pool.is_empty(), "Pool contains no elements!");
 
     let mut rng = rand::thread_rng();
@@ -70,7 +70,7 @@ mod tests {
     #[test]
     fn generate_password_assert_len() {
         let pool = "0123456789".chars().collect::<IndexSet<char>>();
-        let password = generate_password(pool, 15);
+        let password = generate_password(&pool, 15);
 
         assert_eq!(password.len(), 15);
     }
@@ -80,7 +80,7 @@ mod tests {
     fn generate_password_passed_empty_pool() {
         let pool = "".chars().collect::<IndexSet<char>>();
 
-        generate_password(pool, 15);
+        generate_password(&pool, 15);
     }
 
     #[test]
