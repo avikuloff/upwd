@@ -25,9 +25,11 @@ fn main() {
         calculate_length(e, pool.len() as f64).ceil() as usize
     });
 
-    let password = generate_password(pool.clone(), length);
+    for _ in 0..opts.count {
+        let password = generate_password(pool.clone(), length);
 
-    println!("{}", password);
+        println!("{}", password);
+    }
 
     if opts.info {
         let entropy = calculate_entropy(length, pool.len());
@@ -68,6 +70,10 @@ struct Opts {
     /// Sets the minimum required password entropy (conflicts with --length)
     #[clap(short = "E", long, value_name = "NUMBER", conflicts_with = "length")]
     entropy: Option<f64>,
+
+    /// Number of passwords
+    #[clap(short, long, value_name = "NUMBER", default_value = "1")]
+    count: usize,
 
     /// Prints password information
     #[clap(short, long)]
@@ -151,6 +157,7 @@ mod tests {
             others: true,
             length: 0,
             entropy: None,
+            count: 1,
             info: false,
             reset: false,
             config: Config::default(),
@@ -175,6 +182,7 @@ mod tests {
             others: false,
             length: 0,
             entropy: None,
+            count: 1,
             info: false,
             reset: false,
             config: Config::default(),
@@ -194,6 +202,7 @@ mod tests {
             others: true,
             length: 0,
             entropy: None,
+            count: 1,
             info: false,
             reset: false,
             config: Config::default(),
