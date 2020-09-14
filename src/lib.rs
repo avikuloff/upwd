@@ -3,6 +3,8 @@ use num_bigint::BigUint;
 use num_traits::ToPrimitive;
 use rand::Rng;
 
+pub mod config;
+
 /// Generate random password.
 ///
 /// # Examples

@@ -3,12 +3,10 @@ extern crate clap;
 
 use clap::derive::Clap;
 use clap::{AppSettings, ArgGroup};
-use config::Config;
 use indexmap::IndexSet;
 use std::io::{stdout, Write};
 use upwd::{calculate_entropy, calculate_length, generate_password};
-
-mod config;
+use upwd::config::Config;
 
 fn main() {
     let opts: Opts = Opts::parse();
