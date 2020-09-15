@@ -31,8 +31,7 @@ pub fn generate_password(pool: &IndexSet<char>, length: usize) -> String {
         .collect()
 }
 
-/// Calculates entropy.
-/// Returns `f64::NEG_INFINITY` if `pool_size` is 0
+/// Calculates entropy. Maximum value `f64::MAX`
 ///
 /// # Examples
 /// ```
@@ -42,14 +41,14 @@ pub fn generate_password(pool: &IndexSet<char>, length: usize) -> String {
 /// ```
 ///
 /// # Panics
-/// Panics when casting BigUint to f64.
-/// This usually means that the entropy will be greater than 1024 bits.
-// ToDo Нужно ли возвращать бесконечность?
+/// Panics if `pool_size` is zero
 pub fn calculate_entropy(length: usize, pool_size: usize) -> f64 {
+    assert!(pool_size > 0, "Pool size must be greater than zero!");
+
     BigUint::from(pool_size)
         .pow(length as u32)
         .to_f64()
-        .expect("Typecast error! Failed to convert BigUint to f64!")
+        .unwrap_or(f64::MAX)
         .log2()
 }
 
@@ -100,10 +99,9 @@ mod tests {
     }
 
     #[test]
+    #[should_panic(expected="Pool size must be greater than zero!")]
     fn calculate_entropy_passed_pool_size_is_0() {
-        let entropy = calculate_entropy(12, 0);
-
-        assert_eq!(entropy, f64::NEG_INFINITY)
+        calculate_entropy(12, 0);
     }
 
     #[test]
