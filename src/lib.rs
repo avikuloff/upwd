@@ -99,7 +99,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected="Pool size must be greater than zero!")]
+    #[should_panic(expected = "Pool size must be greater than zero!")]
     fn calculate_entropy_passed_pool_size_is_0() {
         calculate_entropy(12, 0);
     }

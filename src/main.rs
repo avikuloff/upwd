@@ -1,9 +1,9 @@
 use clap::Clap;
-use clap::{AppSettings, ArgGroup};
+use clap::{AppSettings};
 use indexmap::IndexSet;
 use std::io::{stdout, Write};
-use upwd::{calculate_entropy, calculate_length, generate_password};
 use upwd::config::Config;
+use upwd::{calculate_entropy, calculate_length, generate_password};
 
 fn main() {
     let opts: Opts = Opts::parse();
@@ -31,28 +31,27 @@ fn main() {
 
 #[derive(Clap, Debug)]
 #[clap(author, about, version,
-group = ArgGroup::new("charset").required(true).multiple(true),
 setting = AppSettings::DeriveDisplayOrder
 )]
 struct Opts {
     /// Use UPPERCASE letters [A-Z]
-    #[clap(short, long, group = "charset")]
+    #[clap(short, long)]
     uppercase: bool,
 
     /// Use lowercase letters [a-z]
-    #[clap(short, long, group = "charset")]
+    #[clap(short, long)]
     lowercase: bool,
 
     /// Use digits [0-9]
-    #[clap(short, long, group = "charset")]
+    #[clap(short, long)]
     digits: bool,
 
     /// Use special symbols [*&^%$#@!~]
-    #[clap(short, long, group = "charset")]
+    #[clap(short, long)]
     symbols: bool,
 
     /// Use other symbols (see config file).
-    #[clap(short, long, group = "charset")]
+    #[clap(short, long)]
     others: bool,
 
     /// Sets the required password length
@@ -81,28 +80,51 @@ struct Opts {
 
 impl Opts {
     // Will panic if all fields are false
-    fn collect_charset(&self) -> IndexSet<char> {
+    pub fn collect_charset(&self) -> IndexSet<char> {
         let mut pool = IndexSet::new();
 
-        if self.uppercase {
-            pool.extend(&self.config.uppercase());
-        }
-        if self.lowercase {
-            pool.extend(&self.config.lowercase());
-        }
-        if self.digits {
-            pool.extend(&self.config.digits());
-        }
-        if self.symbols {
-            pool.extend(&self.config.symbols());
-        }
-        if self.others {
-            pool.extend(&self.config.others());
+        if self.charset_are_false() {
+            pool = self.collect_default_charset();
+        } else {
+            if self.uppercase {
+                pool.extend(&self.config.uppercase());
+            }
+            if self.lowercase {
+                pool.extend(&self.config.lowercase());
+            }
+            if self.digits {
+                pool.extend(&self.config.digits());
+            }
+            if self.symbols {
+                pool.extend(&self.config.symbols());
+            }
+            if self.others {
+                pool.extend(&self.config.others());
+            }
         }
 
         assert!(!pool.is_empty(), "Pool contains no elements!");
 
         pool
+    }
+
+    fn collect_default_charset(&self) -> IndexSet<char> {
+        let mut pool = IndexSet::new();
+
+        pool.extend(&self.config.uppercase());
+        pool.extend(&self.config.lowercase());
+        pool.extend(&self.config.digits());
+
+        pool
+    }
+
+    // Returns true if all flags from charset group are missing
+    fn charset_are_false(&self) -> bool {
+        self.uppercase == false
+            && self.lowercase == false
+            && self.digits == false
+            && self.symbols == false
+            && self.others == false
     }
 }
 
@@ -142,7 +164,7 @@ mod tests {
 
     #[test]
     fn charset_collect_charset() {
-        let pool = Opts {
+        let opts = Opts {
             uppercase: true,
             lowercase: true,
             digits: true,
@@ -154,20 +176,19 @@ mod tests {
             info: false,
             reset: false,
             config: Config::default(),
-        }
-        .collect_charset();
+        };
+        let pool = opts.collect_charset();
 
-        assert!(pool.contains(&'A'));
-        assert!(pool.contains(&'a'));
-        assert!(pool.contains(&'0'));
-        assert!(pool.contains(&'&'));
-        assert!(pool.contains(&'♖'));
+        assert!(pool.is_superset(&opts.config.uppercase()));
+        assert!(pool.is_superset(&opts.config.lowercase()));
+        assert!(pool.is_superset(&opts.config.digits()));
+        assert!(pool.is_superset(&opts.config.symbols()));
+        assert!(pool.is_superset(&opts.config.others()));
     }
 
     #[test]
-    #[should_panic(expected = "Pool contains no elements!")]
     fn charset_collect_all_fields_false() {
-        Opts {
+        let opts = Opts {
             uppercase: false,
             lowercase: false,
             digits: false,
@@ -179,8 +200,14 @@ mod tests {
             info: false,
             reset: false,
             config: Config::default(),
-        }
-        .collect_charset();
+        };
+        let pool = opts.collect_charset();
+
+        assert!(pool.is_superset(&opts.config.uppercase()));
+        assert!(pool.is_superset(&opts.config.lowercase()));
+        assert!(pool.is_superset(&opts.config.digits()));
+
+        assert!(!pool.is_superset(&opts.config.symbols()));
     }
 
     #[test]
