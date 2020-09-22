@@ -9,31 +9,30 @@ cargo install upwd
 
 ## Features
 - Generating password with a given length or entropy
+- Generating multiple passwords
 - Customizable and extensible character sets
 - Unicode character support
 
-## Usage example
-Generate a 12-character password using upper and lower case letters, numbers, and symbols.
+## Usage examples
+Generate a 12-character password using upper and lower case letters, numbers, special symbols and unicode characters.
 ```
-upwd -ulds -L 12
+upwd -uldso -L 12
 ```
 For more information use `--help` flag
 ```
-upwd --help
-
-upwd 0.1.1
+upwd 0.3.0
 Andrey Vikulov <avikuloff@yandex.ru>
 Random password generator
 
 USAGE:
-    upwd [FLAGS] [OPTIONS] <--uppercase|--lowercase|--digits|--symbols|--others>
+    upwd [FLAGS] [OPTIONS]
 
 FLAGS:
     -u, --uppercase    Use UPPERCASE letters [A-Z]
-    -l, --lowercase    Uses lowercase [a-z]
+    -l, --lowercase    Use lowercase letters [a-z]
     -d, --digits       Use digits [0-9]
     -s, --symbols      Use special symbols [*&^%$#@!~]
-    -o, --others       Use other symbols (see config file)
+    -o, --others       Use other symbols [♕♖♗♘♙♚...]
     -i, --info         Prints password information
         --config       Sets config to default values
     -h, --help         Prints help information
@@ -42,6 +41,10 @@ FLAGS:
 OPTIONS:
     -L, --length <NUMBER>     Sets the required password length [default: 12]
     -E, --entropy <NUMBER>    Sets the minimum required password entropy (conflicts with --length)
+    -c, --count <NUMBER>      Number of passwords [default: 1]
+
+If you do not specify any flags [--uppercase, --lowercase, --digits, --symbols, --others], then
+uppercase, lowercase letters and digits will be used.
 ```
 ### Edit character sets
 Run program with `--config` flag, this will create a config file at `/path/to/config/dir/upwd/upwd.conf`.

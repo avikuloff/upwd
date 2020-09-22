@@ -1,5 +1,5 @@
+use clap::AppSettings;
 use clap::Clap;
-use clap::{AppSettings};
 use indexmap::IndexSet;
 use std::io::{stdout, Write};
 use upwd::config::Config;
@@ -31,8 +31,8 @@ fn main() {
 
 #[derive(Clap, Debug)]
 #[clap(author, about, version,
-setting = AppSettings::DeriveDisplayOrder
-)]
+after_help = "If you do not specify any flags [--uppercase, --lowercase, --digits, --symbols, --others], then uppercase, lowercase letters and digits will be used.",
+setting = AppSettings::DeriveDisplayOrder)]
 struct Opts {
     /// Use UPPERCASE letters [A-Z]
     #[clap(short, long)]
@@ -50,7 +50,7 @@ struct Opts {
     #[clap(short, long)]
     symbols: bool,
 
-    /// Use other symbols (see config file).
+    /// Use other symbols [♕♖♗♘♙♚...].
     #[clap(short, long)]
     others: bool,
 

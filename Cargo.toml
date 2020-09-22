@@ -1,6 +1,6 @@
 [package]
 name = "upwd"
-version = "0.2.3"
+version = "0.3.0"
 authors = ["Andrey Vikulov <avikuloff@yandex.ru>"]
 license = "MIT OR Apache-2.0"
 description = "Random password generator"
