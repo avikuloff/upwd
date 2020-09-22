@@ -1,7 +1,4 @@
-#[macro_use]
-extern crate clap;
-
-use clap::derive::Clap;
+use clap::Clap;
 use clap::{AppSettings, ArgGroup};
 use indexmap::IndexSet;
 use std::io::{stdout, Write};
@@ -17,8 +14,6 @@ fn main() {
 
     let pool = opts.collect_charset();
 
-    // Если в команде передана опция --entropy, то вычисляем необходимую длину пароля,
-    // иначе присваивается значение по умолчанию.
     let length = opts.entropy.map_or(opts.length, |e| {
         calculate_length(e, pool.len() as f64).ceil() as usize
     });
@@ -30,8 +25,7 @@ fn main() {
     }
 
     if opts.info {
-        let entropy = calculate_entropy(length, pool.len());
-        Info::new(entropy, length, pool.len()).write(stdout());
+        Info::new(length, pool.len()).write(stdout());
     }
 }
 
@@ -45,7 +39,7 @@ struct Opts {
     #[clap(short, long, group = "charset")]
     uppercase: bool,
 
-    /// Uses lowercase [a-z]
+    /// Use lowercase letters [a-z]
     #[clap(short, long, group = "charset")]
     lowercase: bool,
 
@@ -62,11 +56,11 @@ struct Opts {
     others: bool,
 
     /// Sets the required password length
-    #[clap(short = "L", long, value_name = "NUMBER", default_value = "12")]
+    #[clap(short = 'L', long, value_name = "NUMBER", default_value = "12")]
     length: usize,
 
     /// Sets the minimum required password entropy (conflicts with --length)
-    #[clap(short = "E", long, value_name = "NUMBER", conflicts_with = "length")]
+    #[clap(short = 'E', long, value_name = "NUMBER", conflicts_with = "length")]
     entropy: Option<f64>,
 
     /// Number of passwords
@@ -121,7 +115,9 @@ struct Info {
 
 impl Info {
     // Creates new instance
-    fn new(entropy: f64, length: usize, pool_size: usize) -> Self {
+    fn new(length: usize, pool_size: usize) -> Self {
+        let entropy = calculate_entropy(length, pool_size);
+
         Info {
             entropy,
             length,
@@ -130,7 +126,6 @@ impl Info {
     }
 
     // Prints info
-    // FixMe Как обработать ошибки?
     fn write(&self, mut writer: impl Write) {
         writeln!(
             writer,
@@ -219,9 +214,9 @@ mod tests {
     #[test]
     fn info_write() {
         let mut actual: Vec<u8> = vec![];
-        Info::new(64.0, 15, 64).write(&mut actual);
+        Info::new(15, 64).write(&mut actual);
 
-        let expected = b"Entropy: 64 bits | Length: 15 chars | Pool size: 64 chars\n".to_vec();
+        let expected = b"Entropy: 90 bits | Length: 15 chars | Pool size: 64 chars\n".to_vec();
 
         assert_eq!(actual, expected);
     }
