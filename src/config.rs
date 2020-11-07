@@ -1,5 +1,4 @@
 use confy::ConfyError;
-use indexmap::IndexSet;
 use serde::{Deserialize, Serialize};
 
 const CRATE_NAME: &'static str = env!("CARGO_PKG_NAME");
@@ -7,21 +6,21 @@ const CRATE_NAME: &'static str = env!("CARGO_PKG_NAME");
 // ToDo Нужно реализовать сериализацию в компактном виде
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Config {
-    uppercase: IndexSet<char>,
-    lowercase: IndexSet<char>,
-    digits: IndexSet<char>,
-    symbols: IndexSet<char>,
-    others: IndexSet<char>,
+    uppercase: String,
+    lowercase: String,
+    digits: String,
+    symbols: String,
+    others: String,
 }
 
 impl Default for Config {
     fn default() -> Self {
         Config {
-            uppercase: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".chars().collect(),
-            lowercase: "abcdefghijklmnopqrstuvwxyz".chars().collect(),
-            digits: "0123456789".chars().collect(),
-            symbols: "*&^%$#@!~".chars().collect(),
-            others: "♕♖♗♘♙♚♛♜♝♞♟♠♡♢♣♤♥♦♧♩♪♫♬♭♮♯".chars().collect(),
+            uppercase: "ABCDEFGHIJKLMNOPQRSTUVWXYZ".to_owned(),
+            lowercase: "abcdefghijklmnopqrstuvwxyz".to_owned(),
+            digits: "0123456789".to_owned(),
+            symbols: "*&^%$#@!~".to_owned(),
+            others: "♕♖♗♘♙♚♛♜♝♞♟♠♡♢♣♤♥♦♧♩♪♫♬♭♮♯".to_owned(),
         }
     }
 }
@@ -39,23 +38,23 @@ impl Config {
     }
 
     // ----------------------- Getters ----------------------- //
-    pub fn uppercase(&self) -> IndexSet<char> {
+    pub fn uppercase(&self) -> String {
         self.uppercase.clone()
     }
 
-    pub fn lowercase(&self) -> IndexSet<char> {
+    pub fn lowercase(&self) -> String {
         self.lowercase.clone()
     }
 
-    pub fn digits(&self) -> IndexSet<char> {
+    pub fn digits(&self) -> String {
         self.digits.clone()
     }
 
-    pub fn symbols(&self) -> IndexSet<char> {
+    pub fn symbols(&self) -> String {
         self.symbols.clone()
     }
 
-    pub fn others(&self) -> IndexSet<char> {
+    pub fn others(&self) -> String {
         self.others.clone()
     }
     // ----------------------- End Getters ----------------------- //

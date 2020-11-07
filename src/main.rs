@@ -1,9 +1,8 @@
 use clap::AppSettings;
 use clap::Clap;
-use indexmap::IndexSet;
 use std::io::{stdout, Write};
 use upwd::config::Config;
-use upwd::{calculate_entropy, calculate_length, generate_password};
+use upwd::{calculate_entropy, calculate_length, generate_password, Pool};
 
 fn main() {
     let opts: Opts = Opts::parse();
@@ -12,7 +11,7 @@ fn main() {
         Config::save_default().unwrap();
     }
 
-    let pool = opts.collect_charset();
+    let pool = opts.collect();
 
     let length = opts.entropy.map_or(opts.length, |e| {
         calculate_length(e, pool.len() as f64).ceil() as usize
@@ -80,26 +79,26 @@ struct Opts {
 
 impl Opts {
     // Will panic if all fields are false
-    pub fn collect_charset(&self) -> IndexSet<char> {
-        let mut pool = IndexSet::new();
+    pub fn collect(&self) -> Pool {
+        let mut pool = Pool::new();
 
         if self.charset_are_false() {
-            pool = self.collect_default_charset();
+            pool = self.collect_defaults();
         } else {
             if self.uppercase {
-                pool.extend(&self.config.uppercase());
+                pool.extend_from_string(self.config.uppercase());
             }
             if self.lowercase {
-                pool.extend(&self.config.lowercase());
+                pool.extend_from_string(self.config.lowercase());
             }
             if self.digits {
-                pool.extend(&self.config.digits());
+                pool.extend_from_string(self.config.digits());
             }
             if self.symbols {
-                pool.extend(&self.config.symbols());
+                pool.extend_from_string(self.config.symbols());
             }
             if self.others {
-                pool.extend(&self.config.others());
+                pool.extend_from_string(self.config.others());
             }
         }
 
@@ -108,12 +107,12 @@ impl Opts {
         pool
     }
 
-    fn collect_default_charset(&self) -> IndexSet<char> {
-        let mut pool = IndexSet::new();
+    fn collect_defaults(&self) -> Pool {
+        let mut pool = Pool::new();
 
-        pool.extend(&self.config.uppercase());
-        pool.extend(&self.config.lowercase());
-        pool.extend(&self.config.digits());
+        pool.extend_from_string(self.config.uppercase())
+            .extend_from_string(self.config.lowercase())
+            .extend_from_string(self.config.digits());
 
         pool
     }
@@ -163,7 +162,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn charset_collect_charset() {
+    fn opts_collect() {
         let opts = Opts {
             uppercase: true,
             lowercase: true,
@@ -177,17 +176,17 @@ mod tests {
             reset: false,
             config: Config::default(),
         };
-        let pool = opts.collect_charset();
+        let pool = opts.collect();
 
-        assert!(pool.is_superset(&opts.config.uppercase()));
-        assert!(pool.is_superset(&opts.config.lowercase()));
-        assert!(pool.is_superset(&opts.config.digits()));
-        assert!(pool.is_superset(&opts.config.symbols()));
-        assert!(pool.is_superset(&opts.config.others()));
+        assert!(pool.contains_all(opts.config.uppercase()));
+        assert!(pool.contains_all(opts.config.lowercase()));
+        assert!(pool.contains_all(opts.config.digits()));
+        assert!(pool.contains_all(opts.config.symbols()));
+        assert!(pool.contains_all(opts.config.others()));
     }
 
     #[test]
-    fn charset_collect_all_fields_false() {
+    fn opts_collect_defaults() {
         let opts = Opts {
             uppercase: false,
             lowercase: false,
@@ -201,41 +200,13 @@ mod tests {
             reset: false,
             config: Config::default(),
         };
-        let pool = opts.collect_charset();
+        let pool = opts.collect_defaults();
 
-        assert!(pool.is_superset(&opts.config.uppercase()));
-        assert!(pool.is_superset(&opts.config.lowercase()));
-        assert!(pool.is_superset(&opts.config.digits()));
+        assert!(pool.contains_all(opts.config.uppercase()));
+        assert!(pool.contains_all(opts.config.lowercase()));
+        assert!(pool.contains_all(opts.config.digits()));
 
-        assert!(!pool.is_superset(&opts.config.symbols()));
-    }
-
-    #[test]
-    fn generate_password_intersection() {
-        let cfg = Config::default();
-
-        let pool = Opts {
-            uppercase: true,
-            lowercase: true,
-            digits: true,
-            symbols: true,
-            others: true,
-            length: 0,
-            entropy: None,
-            count: 1,
-            info: false,
-            reset: false,
-            config: Config::default(),
-        }
-        .collect_charset();
-
-        let password: IndexSet<char> = generate_password(&pool, 1000).chars().collect();
-
-        assert!(!password.is_disjoint(&cfg.uppercase()));
-        assert!(!password.is_disjoint(&cfg.lowercase()));
-        assert!(!password.is_disjoint(&cfg.digits()));
-        assert!(!password.is_disjoint(&cfg.symbols()));
-        assert!(!password.is_disjoint(&cfg.others()));
+        assert!(!pool.contains_all(opts.config.symbols()));
     }
 
     #[test]

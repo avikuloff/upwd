@@ -5,20 +5,74 @@ use rand::Rng;
 
 pub mod config;
 
+/// Collection of unique chars
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Pool(IndexSet<char>);
+
+impl Pool {
+    /// Create new empty pool
+    pub fn new() -> Self {
+        Pool(IndexSet::new())
+    }
+
+    /// Create new pool from [`std::string::String`]
+    pub fn from_string(s: String) -> Self {
+        Pool(s.chars().collect::<IndexSet<char>>())
+    }
+
+    /// Return number of chars in the pool
+    ///
+    /// # Examples
+    /// ```
+    /// # use indexmap::IndexSet;
+    /// let pool = "0123456789".chars().collect::<IndexSet<char>>();
+    ///
+    /// assert_eq!(pool.len(), 10)
+    /// ```
+    pub fn len(&self) -> usize {
+        self.0.len()
+    }
+
+    pub fn extend_from_string(&mut self, s: String) -> &mut Self {
+        self.0.extend(s.chars().collect::<IndexSet<char>>());
+
+        self
+    }
+
+    /// Returns true if pool contains no elements
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
+
+    /// Get char by index
+    pub fn get(&self, index: usize) -> Option<&char> {
+        self.0.get_index(index)
+    }
+
+    pub fn contains(&self, element: char) -> bool {
+        self.0.contains(&element)
+    }
+
+    pub fn contains_all(&self, elements: String) -> bool {
+        self.0.is_superset(&elements.chars().collect::<IndexSet<char>>())
+    }
+}
+
 /// Generate random password.
 ///
 /// # Examples
 /// ```
 /// # use indexmap::IndexSet;
-/// let pool = "0123456789".chars().collect::<IndexSet<char>>();
-/// let password = upwd::generate_password(&pool, 15);
+/// use upwd::Pool;
+/// let pool = "0123456789".to_owned();
+/// let password = upwd::generate_password(&Pool::from_string(pool), 15);
 ///
 /// assert_eq!(password.len(), 15);
 /// ```
 ///
 /// # Panics
 /// Panics if `pool` is empty.
-pub fn generate_password(pool: &IndexSet<char>, length: usize) -> String {
+pub fn generate_password(pool: &Pool, length: usize) -> String {
     assert!(!pool.is_empty(), "Pool contains no elements!");
 
     let mut rng = rand::thread_rng();
@@ -26,7 +80,7 @@ pub fn generate_password(pool: &IndexSet<char>, length: usize) -> String {
     (0..length)
         .map(|_| {
             let idx = rng.gen_range(0, pool.len());
-            pool[idx]
+            *pool.get(idx).unwrap()
         })
         .collect()
 }
@@ -71,7 +125,7 @@ mod tests {
     #[test]
     fn generate_password_assert_len() {
         let pool = "0123456789".chars().collect::<IndexSet<char>>();
-        let password = generate_password(&pool, 15);
+        let password = generate_password(&Pool(pool), 15);
 
         assert_eq!(password.len(), 15);
     }
@@ -81,7 +135,7 @@ mod tests {
     fn generate_password_passed_empty_pool() {
         let pool = "".chars().collect::<IndexSet<char>>();
 
-        generate_password(&pool, 15);
+        generate_password(&Pool(pool), 15);
     }
 
     #[test]
