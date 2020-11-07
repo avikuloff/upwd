@@ -33,6 +33,7 @@ impl Pool {
         self.0.len()
     }
 
+    /// Extracts all chars from the string and adds them to the pool
     pub fn extend_from_string(&mut self, s: String) -> &mut Self {
         self.0.extend(s.chars().collect::<IndexSet<char>>());
 
@@ -49,10 +50,12 @@ impl Pool {
         self.0.get_index(index)
     }
 
+    /// Returns true if pool contains char `element`
     pub fn contains(&self, element: char) -> bool {
         self.0.contains(&element)
     }
 
+    /// Returns true if pool contains each char from the string `elements`
     pub fn contains_all(&self, elements: String) -> bool {
         self.0.is_superset(&elements.chars().collect::<IndexSet<char>>())
     }

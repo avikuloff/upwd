@@ -30,7 +30,7 @@ fn main() {
 
 #[derive(Clap, Debug)]
 #[clap(author, about, version,
-after_help = "If you do not specify any flags [--uppercase, --lowercase, --digits, --symbols, --others], then uppercase, lowercase letters and digits will be used.",
+after_help = "If you do not specify any of the [--uppercase, --lowercase, --digits, --symbols, --others] flags, then uppercase, lowercase letters and digits will be used.",
 setting = AppSettings::DeriveDisplayOrder)]
 struct Opts {
     /// Use UPPERCASE letters [A-Z]

@@ -8,15 +8,19 @@ cargo install upwd
 ```
 
 ## Features
-- Generating password with a given length or entropy
-- Generating multiple passwords
-- Customizable and extensible character sets
-- Unicode character support
+- Generation of password for a given length or entropy
+- Generation of multiple passwords
+- User-definable character sets
+- Unicode Character Support
 
 ## Usage examples
-Generate a 12-character password using upper and lower case letters, numbers, special symbols and unicode characters.
+Generates a 12-character password using upper and lowercase letters, digits, special symbols and unicode characters:
 ```
 upwd -uldso -L 12
+```
+Generate a password with default settings:
+```
+upwd
 ```
 For more information use `--help` flag
 ```
@@ -43,12 +47,12 @@ OPTIONS:
     -E, --entropy <NUMBER>    Sets the minimum required password entropy (conflicts with --length)
     -c, --count <NUMBER>      Number of passwords [default: 1]
 
-If you do not specify any flags [--uppercase, --lowercase, --digits, --symbols, --others], then
+If you do not specify any of the [--uppercase, --lowercase, --digits, --symbols, --others] flags, then
 uppercase, lowercase letters and digits will be used.
 ```
 ### Edit character sets
-Run program with `--config` flag, this will create a config file at `/path/to/config/dir/upwd/upwd.conf`.
-Change the character sets in this file to your liking.
+Run the program with `--config` flag, this will create a config file in `/path/to/config/dir/upwd/upwd.conf`.
+Open this file in a text editor and change the character sets.
 
 ## License
 `upwd` is distributed under the terms of both the [MIT license](LICENSE-MIT) and the [Apache License (Version 2.0)](LICENSE-APACHE).

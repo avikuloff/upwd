@@ -3,7 +3,6 @@ use serde::{Deserialize, Serialize};
 
 const CRATE_NAME: &'static str = env!("CARGO_PKG_NAME");
 
-// ToDo Нужно реализовать сериализацию в компактном виде
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Config {
     uppercase: String,
