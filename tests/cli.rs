@@ -1,6 +1,6 @@
 use assert_cmd::Command;
 use predicates::prelude::predicate;
-use std::io::{BufReader, BufRead};
+use std::io::{BufRead, BufReader};
 
 fn cmd() -> Command {
     Command::cargo_bin(env!("CARGO_PKG_NAME")).unwrap()
@@ -11,8 +11,7 @@ fn default_password_length_is_12() {
     let mut cmd = cmd();
     let predicate_fn = predicate::function(|x: &str| x.trim().len() == 12);
 
-    cmd.assert().success()
-        .stdout(predicate_fn);
+    cmd.assert().success().stdout(predicate_fn);
 }
 
 #[test]
@@ -22,8 +21,7 @@ fn password_length_eq_arg_length() {
 
     let predicate_fn = predicate::function(|x: &str| x.trim().len() == 6);
 
-    cmd.assert().success()
-        .stdout(predicate_fn);
+    cmd.assert().success().stdout(predicate_fn);
 }
 
 #[test]

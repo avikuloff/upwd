@@ -3,6 +3,7 @@ use num_bigint::BigUint;
 use num_traits::ToPrimitive;
 use rand::Rng;
 
+pub mod cli;
 pub mod config;
 
 /// Collection of unique chars
@@ -57,7 +58,8 @@ impl Pool {
 
     /// Returns true if pool contains each char from the string `elements`
     pub fn contains_all(&self, elements: String) -> bool {
-        self.0.is_superset(&elements.chars().collect::<IndexSet<char>>())
+        self.0
+            .is_superset(&elements.chars().collect::<IndexSet<char>>())
     }
 }
 
