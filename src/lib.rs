@@ -90,7 +90,7 @@ pub fn generate_password(pool: &Pool, length: usize) -> String {
         .collect()
 }
 
-/// Calculates entropy. Maximum value `f64::MAX`
+/// Calculates entropy.
 ///
 /// # Examples
 /// ```
@@ -111,7 +111,7 @@ pub fn calculate_entropy(length: usize, pool_size: usize) -> f64 {
         .log2()
 }
 
-/// Calculates the required password length to obtain the given entropy.
+/// Calculates the minimum password length required to obtain a given entropy.
 ///
 /// # Examples
 /// ```

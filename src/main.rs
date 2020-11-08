@@ -7,6 +7,7 @@ use upwd::{calculate_length, generate_password};
 fn main() {
     let opts: Cli = Cli::parse();
 
+    // Todo обработать ошибки, добавить сообщение и завершить выполнение
     if opts.reset() {
         Config::save_default().unwrap();
     }

@@ -6,7 +6,9 @@ use std::io::Write;
 
 #[derive(Clap, Debug)]
 #[clap(author, about, version,
-after_help = "If you do not specify any of the [--uppercase, --lowercase, --digits, --symbols, --others] flags, then uppercase, lowercase letters and digits will be used.",
+after_help = "If you do not specify any of the \
+[--uppercase, --lowercase, --digits, --symbols, --others] flags, \
+then uppercase, lowercase letters and digits will be used.",
 setting = AppSettings::DeriveDisplayOrder)]
 pub struct Cli {
     /// Use UPPERCASE letters [A-Z]
@@ -54,12 +56,11 @@ pub struct Cli {
 }
 
 impl Cli {
-    // Will panic if all fields are false
     pub fn collect(&self) -> Pool {
         let mut pool = Pool::new();
 
         if self.charset_are_false() {
-            pool = self.collect_defaults();
+            pool.extend_from_string(self.config.default_set());
         } else {
             if self.uppercase {
                 pool.extend_from_string(self.config.uppercase());
@@ -83,17 +84,7 @@ impl Cli {
         pool
     }
 
-    fn collect_defaults(&self) -> Pool {
-        let mut pool = Pool::new();
-
-        pool.extend_from_string(self.config.uppercase())
-            .extend_from_string(self.config.lowercase())
-            .extend_from_string(self.config.digits());
-
-        pool
-    }
-
-    // Returns true if all flags from charset group are missing
+    // Returns true if no character set flags are specified
     fn charset_are_false(&self) -> bool {
         self.uppercase == false
             && self.lowercase == false
@@ -179,30 +170,6 @@ mod tests {
         assert!(pool.contains_all(opts.config.digits()));
         assert!(pool.contains_all(opts.config.symbols()));
         assert!(pool.contains_all(opts.config.others()));
-    }
-
-    #[test]
-    fn opts_collect_defaults() {
-        let opts = Cli {
-            uppercase: false,
-            lowercase: false,
-            digits: false,
-            symbols: false,
-            others: false,
-            length: 0,
-            entropy: None,
-            count: 1,
-            info: false,
-            reset: false,
-            config: Config::default(),
-        };
-        let pool = opts.collect_defaults();
-
-        assert!(pool.contains_all(opts.config.uppercase()));
-        assert!(pool.contains_all(opts.config.lowercase()));
-        assert!(pool.contains_all(opts.config.digits()));
-
-        assert!(!pool.contains_all(opts.config.symbols()));
     }
 
     #[test]
