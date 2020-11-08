@@ -1,6 +1,6 @@
 [package]
 name = "upwd"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["Andrey Vikulov <avikuloff@yandex.ru>"]
 license = "MIT OR Apache-2.0"
 description = "Random password generator"
@@ -20,6 +20,7 @@ num-traits = "0.2"
 indexmap = { version = "1.6", features = ["serde-1"] }
 serde = { version = "1.0", features = ["derive"] }
 confy = "0.4"
+exitcode = "1.1"
 
 [dev-dependencies]
 assert_cmd = "1.0"
