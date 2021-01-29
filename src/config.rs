@@ -40,28 +40,28 @@ impl Config {
     }
 
     // ----------------------- Getters ----------------------- //
-    pub fn default_set(&self) -> String {
-        self.default_set.clone()
+    pub fn default_set(&self) -> &str {
+        &self.default_set
     }
 
-    pub fn uppercase(&self) -> String {
-        self.uppercase.clone()
+    pub fn uppercase(&self) -> &str {
+        &self.uppercase
     }
 
-    pub fn lowercase(&self) -> String {
-        self.lowercase.clone()
+    pub fn lowercase(&self) -> &str {
+        &self.lowercase
     }
 
-    pub fn digits(&self) -> String {
-        self.digits.clone()
+    pub fn digits(&self) -> &str {
+        &self.digits
     }
 
-    pub fn symbols(&self) -> String {
-        self.symbols.clone()
+    pub fn symbols(&self) -> &str {
+        &self.symbols
     }
 
-    pub fn others(&self) -> String {
-        self.others.clone()
+    pub fn others(&self) -> &str {
+        &self.others
     }
     // ----------------------- End Getters ----------------------- //
 }

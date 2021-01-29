@@ -1,8 +1,11 @@
+use crate::cli::{Cli, Info};
+use crate::config::Config;
 use clap::Clap;
 use std::io::stdout;
-use upwd::cli::{Cli, Info};
-use upwd::config::Config;
-use upwd::{calculate_length, generate_password};
+use upwd_lib::{calculate_length, generate_password};
+
+pub mod cli;
+pub mod config;
 
 fn main() {
     let opts: Cli = Cli::parse();
@@ -13,7 +16,7 @@ fn main() {
                 println!("The default configuration was set successfully!");
                 std::process::exit(exitcode::OK);
             }
-            Err(e) => eprintln!("{}", e.to_string())
+            Err(e) => eprintln!("{}", e.to_string()),
         }
     }
 

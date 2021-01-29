@@ -1,8 +1,8 @@
 use crate::config::Config;
-use crate::{calculate_entropy, Pool};
 use clap::AppSettings;
 use clap::Clap;
 use std::io::Write;
+use upwd_lib::{calculate_entropy, Pool};
 
 #[derive(Clap, Debug)]
 #[clap(author, about, version,
