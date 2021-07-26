@@ -59,38 +59,27 @@ impl Cli {
     pub fn collect(&self) -> Pool {
         let mut pool = Pool::new();
 
-        if self.charset_are_false() {
-            pool.extend_from_string(self.config.default_set());
-        } else {
-            if self.uppercase {
-                pool.extend_from_string(self.config.uppercase());
-            }
-            if self.lowercase {
-                pool.extend_from_string(self.config.lowercase());
-            }
-            if self.digits {
-                pool.extend_from_string(self.config.digits());
-            }
-            if self.symbols {
-                pool.extend_from_string(self.config.symbols());
-            }
-            if self.others {
-                pool.extend_from_string(self.config.others());
-            }
+        if self.uppercase {
+            pool.extend_from_string(self.config.uppercase());
+        }
+        if self.lowercase {
+            pool.extend_from_string(self.config.lowercase());
+        }
+        if self.digits {
+            pool.extend_from_string(self.config.digits());
+        }
+        if self.symbols {
+            pool.extend_from_string(self.config.symbols());
+        }
+        if self.others {
+            pool.extend_from_string(self.config.others());
         }
 
-        assert!(!pool.is_empty(), "Pool contains no elements!");
+        if pool.is_empty() {
+            pool.extend_from_string(self.config.default_set());
+        }
 
         pool
-    }
-
-    // Returns true if no character set flags are specified
-    fn charset_are_false(&self) -> bool {
-        self.uppercase == false
-            && self.lowercase == false
-            && self.digits == false
-            && self.symbols == false
-            && self.others == false
     }
 
     pub fn count(&self) -> usize {
