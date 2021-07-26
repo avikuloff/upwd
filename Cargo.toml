@@ -6,6 +6,7 @@ license = "MIT OR Apache-2.0"
 description = "Random password generator"
 keywords = ["cli", "password"]
 categories = ["command-line-utilities"]
+homepage = "https://github.com/avikuloff/upwd/"
 repository = "https://github.com/avikuloff/upwd/"
 readme = "README.md"
 edition = "2018"

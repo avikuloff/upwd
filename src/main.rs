@@ -23,7 +23,7 @@ fn main() {
     let pool = opts.collect();
 
     let length = opts.entropy().map_or(opts.length(), |e| {
-        calculate_length(e, pool.len() as f64).ceil() as usize
+        calculate_length(e, pool.len() as f64) as usize
     });
 
     for _ in 0..opts.count() {
